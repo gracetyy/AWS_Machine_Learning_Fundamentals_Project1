@@ -1,0 +1,33 @@
+{
+  "Comment": "Image Classification Workflow",
+  "StartAt": "SerializeImageData",
+  "States": {
+    "SerializeImageData": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:911167908333:function:serializeImageData:$LATEST",
+      "Next": "ClassifyImage"
+    },
+    "ClassifyImage": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:911167908333:function:imageClassification:$LATEST",
+      "Next": "FilterInferences"
+    },
+    "FilterInferences": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:911167908333:function:serializeImageData:$LATEST",
+      "End": true,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "FailState"
+        }
+      ]
+    },
+    "FailState": {
+      "Type": "Fail",
+      "Cause": "Confidence threshold not met"
+    }
+  }
+}
